@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Multiplayer Game</title>
+  <style>
+    body, html {
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      height: 100%;
+    }
+
+    canvas {
+      display: block;
+      background-color: #f0f0f0;
+    }
+  </style>
+</head>
+<body>
+  <canvas id="gameCanvas"></canvas>
+
+  <script>
+    // Canvas Setup
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+
+    // Player properties
+    const players = {
+      player1: { x: canvas.width / 4, y: canvas.height / 2, radius: 20, color: 'blue', dx: 0, dy: 0 },
+      player2: { x: (canvas.width / 4) * 3, y: canvas.height / 2, radius: 20, color: 'red', dx: 0, dy: 0 }
+    };
+
+    const speed = 5;
+    const keys = {
+      ArrowUp: false, ArrowDown: false, ArrowLeft: false, ArrowRight: false,  // Player 1 controls
+      w: false, a: false, s: false, d: false                                // Player 2 controls (WASD)
+    };
+
+    // Key Press Handlers
+    document.addEventListener('keydown', (event) => {
+      keys[event.key] = true;
+    });
+
+    document.addEventListener('keyup', (event) => {
+      keys[event.key] = false;
+    });
+
+    // Move player function
+    function movePlayer(player) {
+      if (player === 'player1') {
+        if (keys['ArrowUp']) players.player1.dy = -speed;
+        if (keys['ArrowDown']) players.player1.dy = speed;
+        if (keys['ArrowLeft']) players.player1.dx = -speed;
+        if (keys['ArrowRight']) players.player1.dx = speed;
+      } else if (player === 'player2') {
+        if (keys['w']) players.player2.dy = -speed;
+        if (keys['s']) players.player2.dy = speed;
+        if (keys['a']) players.player2.dx = -speed;
+        if (keys['d']) players.player2.dx = speed;
+      }
+
+      // Update player position
+      players[player].x += players[player].dx;
+      players[player].y += players[player].dy;
+
+      // Boundary Check
+      if (players[player].x - players[player].radius < 0) players[player].x = players[player].radius;
+      if (players[player].x + players[player].radius > canvas.width) players[player].x = canvas.width - players[player].radius;
+      if (players[player].y - players[player].radius < 0) players[player].y = players[player].radius;
+      if (players[player].y + players[player].radius > canvas.height) players[player].y = canvas.height - players[player].radius;
+
+      // Stop movement when no keys are pressed
+      if (!keys['ArrowUp'] && !keys['ArrowDown']) players.player1.dy = 0;
+      if (!keys['ArrowLeft'] && !keys['ArrowRight']) players.player1.dx = 0;
+      if (!keys['w'] && !keys['s']) players.player2.dy = 0;
+      if (!keys['a'] && !keys['d']) players.player2.dx = 0;
+    }
+
+    // Draw player function
+    function drawPlayer(player) {
+      ctx.beginPath();
+      ctx.arc(players[player].x, players[player].y, players[player].radius, 0, Math.PI * 2);
+      ctx.fillStyle = players[player].color;
+      ctx.fill();
+      ctx.closePath();
+    }
+
+    // Game loop function
+    function gameLoop() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      // Move and draw players
+      movePlayer('player1');
+      movePlayer('player2');
+      drawPlayer('player1');
+      drawPlayer('player2');
+
+      // Continue the loop
+      requestAnimationFrame(gameLoop);
+    }
+
+    // Start the game loop
+    gameLoop();
+  </script>
+</body>
+</html>
